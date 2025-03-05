@@ -1,0 +1,319 @@
+</think> 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云无损解析</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/aplayer/1.10.1/APlayer.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #f5f7fa;
+            --card-background-color: rgba(255, 255, 255, 0.95);
+            --border-radius: 1rem;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --font-size-base: 1rem;
+            --line-height-base: 1.6;
+        }
+ 
+        body {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
+            margin: 0;
+            padding: 0;
+        }
+ 
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+ 
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            background-color: var(--card-background-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+ 
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.5rem;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+ 
+        .card-form {
+            background-color: var(--card-background-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+ 
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+ 
+        .form-control {
+            border: 2px solid #e0e6ed;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+ 
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+ 
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            width: 100%;
+        }
+ 
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+ 
+        .result-card {
+            background-color: var(--card-background-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+ 
+        .song-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+ 
+        .song-info img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: var(--border-radius);
+            margin-right: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+ 
+        .song-info img:hover {
+            transform: translateY(-2px);
+        }
+ 
+        .song-info .info {
+            flex-grow: 1;
+        }
+ 
+        .song-info .info h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+ 
+        .song-info .info p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+ 
+        .aplayer {
+            width: 100%;
+            margin: 1rem 0;
+            background-color: var(--card-background-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+        }
+ 
+        .download-btn {
+            margin-top: 1rem;
+        }
+ 
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: var(--border-radius);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>网易云无损解析</h1>
+            <p>支持多种音质解析和下载</p>
+        </div>
+ 
+        <div class="card-form">
+            <div class="form-group">
+                <label for="music-links">请输入网易云音乐链接（每行一个）</label>
+                <textarea class="form-control" id="music-links" rows="5" placeholder="例如：https://music.163.com/song?id=..."></textarea>
+            </div>
+ 
+            <div class="form-group">
+                <label for="quality-select">选择音质</label>
+                <select class="form-control" id="quality-select">
+                    <option value="standard">标准音质</option>
+                    <option value="high">极高音质</option>
+                    <option value="lossless">无损音质</option>
+                    <option value="hi-res">Hi-Res</option>
+                    <option value="surround">高清环绕声</option>
+                </select>
+            </div>
+ 
+            <button class="btn btn-primary" onclick="parseLinks()">开始解析</button>
+        </div>
+ 
+        <div id="results"></div>
+    </div>
+ 
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/aplayer/1.10.1/APlayer.min.js"></script>
+    <script>
+        function parseLinks() {
+            const links = $('#music-links').val().trim().split('\n');
+            const quality = $('#quality-select').val();
+ 
+            if (!links || links.length === 0) {
+                showError('请至少输入一个有效的网易云音乐链接');
+                return;
+            }
+ 
+            // 清空结果区域 
+            $('#results').empty();
+ 
+            // 添加加载提示 
+            const loadingHtml = `
+                <div class="result-card">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">解析中...</span>
+                        </div>
+                        <p class="mt-2">正在解析...</p>
+                    </div>
+                </div>
+            `;
+            $('#results').append(loadingHtml);
+ 
+            // 逐个解析链接 
+            let successCount = 0;
+            let failedLinks = [];
+ 
+            links.forEach((link, index) => {
+                setTimeout(() => {
+                    parseSingleLink(link, quality, (success, data) => {
+                        if (success) {
+                            displayResult(data);
+                            successCount++;
+                        } else {
+                            failedLinks.push(link);
+                        }
+ 
+                        // 最后一个链接解析完成时，显示统计信息 
+                        if (index === links.length - 1) {
+                            showStatistics(successCount, links.length - successCount);
+                        }
+                    });
+                }, index * 500); // 间隔解析，避免触发反爬机制 
+            });
+        }
+ 
+        function parseSingleLink(link, quality, callback) {
+            // 模拟API调用 
+            setTimeout(() => {
+                if (Math.random() > 0.5) {
+                    // 成功
+                    const data = {
+                        cover: 'https://picsum.photos/300',
+                        title: '示例歌曲标题',
+                        artist: '示例艺术家',
+                        album: '示例专辑',
+                        quality: quality,
+                        size: '8.5 MB',
+                        audioUrl: 'https://cdn.example.com/audio.mp3'
+                    };
+                    callback(true, data);
+                } else {
+                    // 失败
+                    callback(false, null);
+                }
+            }, 1000);
+        }
+ 
+        function displayResult(data) {
+            const resultHtml = `
+                <div class="result-card">
+                    <div class="song-info">
+                        <img src="${data.cover}" alt="${data.title}" class="img-fluid rounded">
+                        <div class="info">
+                            <h3>${data.title}</h3>
+                            <p>艺术家：${data.artist}</p>
+                            <p>专辑：${data.album}</p>
+                            <p>音质：${data.quality}</p>
+                            <p>大小：${data.size}</p>
+                        </div>
+                    </div>
+                    <div class="aplayer">
+                        <audio controls>
+                            <source src="${data.audioUrl}" type="audio/mpeg">
+                            您的浏览器不支持 audio 元素。
+                        </audio>
+                    </div>
+                    <button class="btn btn-primary download-btn" onclick="downloadMusic('${data.audioUrl}')">下载音乐</button>
+                </div>
+            `;
+            $('#results').append(resultHtml);
+        }
+ 
+        function showStatistics(successCount, failCount) {
+            const statsHtml = `
+                <div class="result-card">
+                    <h4>解析统计</h4>
+                    <p>成功：${successCount} 首</p>
+                    <p>失败：${failCount} 首</p>
+                </div>
+            `;
+            $('#results').append(statsHtml);
+        }
+ 
+        function showError(message) {
+            const errorHtml = `
+                <div class="error-message">
+                    ${message}
+                </div>
+            `;
+            $('#results').html(errorHtml);
+        }
+ 
+        function downloadMusic(url) {
+            // 实现下载逻辑 
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
+```
+ 
+主要优化点
+ 
+1. 全局样式统一
